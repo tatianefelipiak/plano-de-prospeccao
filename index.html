@@ -1,14 +1,447 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mapa da Prospecção Digital</title>
-  </head>
-  <body>
-    <div id="root"></div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Prospecção Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #000;
+        }
+        .royal-blue { color: #2B59FF; }
+        .bg-royal-blue { background-color: #2B59FF; }
+        .border-gray-ee { border-color: #EEEEEE; }
+        
+        input, textarea {
+            background: transparent;
+            outline: none;
+            width: 100%;
+            transition: color 0.2s;
+        }
+        textarea {
+            resize: none;
+            overflow: hidden;
+            min-height: 60px;
+        }
+        .canvas-block {
+            position: relative;
+            padding: 2.5rem;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        .icon-watermark {
+            position: absolute;
+            top: 2.5rem;
+            right: 2.5rem;
+            color: #F3F4F6;
+            pointer-events: none;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; padding: 0; }
+        }
+        /* Remove arrows from number inputs */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1"
+  }
+}
+</script>
+</head>
+<body class="py-12 px-4">
+    <div class="max-w-[1200px] mx-auto">
+        <!-- Botão de Exportar -->
+        <div class="flex justify-end mb-6 no-print">
+            <button id="exportBtn" class="flex items-center gap-2 px-8 py-3 bg-black text-white rounded-lg font-bold text-sm hover:bg-gray-800 transition-all shadow-md active:scale-95">
+                <i data-lucide="download" class="w-4 h-4"></i> Exportar Plano
+            </button>
+        </div>
 
-    <!-- Vite vai injetar o JS correto aqui no build -->
-    <script type="module" src="./index.tsx"></script>
-  </body>
+        <!-- Canvas Principal -->
+        <div id="captureArea" class="bg-white border-gray-ee md:border md:shadow-2xl overflow-hidden flex flex-col">
+            
+            <!-- Header -->
+            <div class="px-12 pt-16 pb-12 flex flex-col lg:flex-row justify-start items-start lg:items-end gap-10 lg:gap-32 border-b border-gray-ee">
+                <div class="mb-8 lg:mb-0 flex-shrink-0">
+                    <h1 class="text-[32px] md:text-[42px] font-black text-gray-900 leading-[0.9] uppercase tracking-tighter">
+                        PLANO DE<br />PROSPECÇÃO
+                    </h1>
+                    <p class="text-[13px] mt-4 text-gray-400 font-medium uppercase tracking-widest">
+                        Gere leads em <a href="https://maquinadeleads.com/" target="_blank" class="text-black font-bold hover:underline">maquinadeleads.com</a>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 w-full lg:w-auto">
+                    <div class="border-b border-gray-ee pb-2 min-w-[200px]">
+                        <label class="block text-[13px] font-medium text-gray-500 uppercase tracking-widest mb-1">Empresa:</label>
+                        <input type="text" id="input-empresa" class="text-[20px] royal-blue" placeholder="Nome da empresa">
+                    </div>
+                    <div class="border-b border-gray-ee pb-2 min-w-[240px]">
+                        <label class="block text-[13px] font-medium text-gray-500 uppercase tracking-widest mb-1">Produto/Serviço:</label>
+                        <input type="text" id="input-produto" class="text-[20px] royal-blue" placeholder="Ex: Consultoria">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Superior de Metas -->
+            <div class="grid grid-cols-1 md:grid-cols-4 border-b border-gray-ee">
+                <!-- Meta Financeira -->
+                <div class="canvas-block border-r border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="flag" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Meta de Vendas</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5 font-normal">Qual é a sua meta financeira?</p>
+                    </div>
+                    <div class="flex-1 py-2">
+                        <input type="text" id="input-metaVendas" class="text-[20px] font-normal royal-blue" value="R$ 0,00">
+                        <div class="w-24 h-[1px] bg-[#EEEEEE] my-4"></div>
+                    </div>
+                </div>
+
+                <!-- Ticket e Conversão -->
+                <div class="flex flex-col border-r border-gray-ee">
+                    <div class="canvas-block flex-1 border-b border-gray-ee">
+                        <div class="icon-watermark"><i data-lucide="dollar-sign" class="w-6 h-6"></i></div>
+                        <div class="mb-6 pr-12">
+                            <h3 class="font-bold text-[15px] uppercase">Ticket Médio</h3>
+                            <p class="text-[13px] text-[#757575] mt-1.5 font-normal">Valor médio da venda?</p>
+                        </div>
+                        <input type="text" id="input-ticketMedio" class="text-[20px] royal-blue" value="R$ 0,00">
+                    </div>
+                    <div class="canvas-block flex-1">
+                        <div class="icon-watermark"><i data-lucide="percent" class="w-6 h-6"></i></div>
+                        <div class="mb-6 pr-12">
+                            <h3 class="font-bold text-[15px] uppercase">Taxa de Conversão</h3>
+                            <p class="text-[13px] text-[#757575] mt-1.5 font-normal">Conversão em vendas?</p>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="number" id="input-taxaConversao" class="w-12 text-[20px] royal-blue" placeholder="0">
+                            <span class="text-[20px] royal-blue">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vendas Necessárias -->
+                <div class="canvas-block border-r border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="filter" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Vendas Necessárias</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5 font-normal">Quantas vendas precisa?</p>
+                    </div>
+                    <div class="flex flex-col gap-6 py-2">
+                        <div>
+                            <p class="text-[13px] font-medium text-gray-500 mb-1">Vendas no Mês</p>
+                            <p class="text-[20px] royal-blue" id="display-vendasMes">0 <span class="text-[13px] text-gray-400">vendas</span></p>
+                        </div>
+                        <div class="border-t border-[#F5F5F5] pt-6 flex flex-col gap-5">
+                            <div>
+                                <p class="text-[13px] font-medium text-gray-500 mb-1">Por semana</p>
+                                <p class="text-[20px] royal-blue" id="display-vendasSemana">0</p>
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-medium text-gray-500 mb-1">Por dia útil</p>
+                                <p class="text-[20px] royal-blue" id="display-vendasDia">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leads e Capacidade -->
+                <div class="flex flex-col">
+                    <div class="canvas-block flex-1 border-b border-gray-ee">
+                        <div class="icon-watermark"><i data-lucide="target" class="w-7 h-7"></i></div>
+                        <div class="mb-6 pr-12">
+                            <h3 class="font-bold text-[15px] uppercase">Leads Necessários</h3>
+                            <p class="text-[13px] text-[#757575] mt-1.5 font-normal">De quantos leads precisa?</p>
+                        </div>
+                        <p class="text-[20px] royal-blue" id="display-leadsNecessarios">0 <span class="text-[14px]">leads</span></p>
+                    </div>
+                    <div class="canvas-block flex-1">
+                        <div class="icon-watermark"><i data-lucide="zap" class="w-6 h-6"></i></div>
+                        <div class="mb-6 pr-12">
+                            <h3 class="font-bold text-[15px] uppercase">Capacidade de Vendas</h3>
+                            <p class="text-[13px] text-[#757575] mt-1.5 font-normal">Novos contatos por dia?</p>
+                        </div>
+                        <p class="text-[20px] royal-blue" id="display-abordagensDiarias">0 <span class="text-[14px]">contatos</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subheader Plano Execução -->
+            <div class="bg-[#fcfcfc] border-b border-gray-ee px-12 py-8">
+                <h2 class="text-[24px] font-black text-gray-900 uppercase tracking-tight">PLANO DE EXECUÇÃO</h2>
+            </div>
+
+            <!-- Grid Plano de Execução -->
+            <div class="grid grid-cols-1 md:grid-cols-2 flex-1">
+                <!-- Segmentação -->
+                <div class="canvas-block border-r border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="users" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Segmentação</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Qual é o segmento de mercado?</p>
+                    </div>
+                    <textarea id="text-segmentacao" placeholder="Ex: Pet Shop"></textarea>
+                </div>
+                <!-- Comunicação -->
+                <div class="canvas-block border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="message-circle" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Comunicação</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Melhores canais para abordagem?</p>
+                    </div>
+                    <textarea id="text-comunicacao" placeholder="Ex: WhatsApp"></textarea>
+                </div>
+                <!-- Localização -->
+                <div class="canvas-block border-r border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="map-pin" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Localização</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Onde o cliente ideal está?</p>
+                    </div>
+                    <textarea id="text-localizacao" placeholder="Ex: Curitiba"></textarea>
+                </div>
+                <!-- Fontes -->
+                <div class="canvas-block border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="database" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Fontes</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Onde o lead será extraído?</p>
+                    </div>
+                    <textarea id="text-fontes" placeholder="Ex: Google Maps"></textarea>
+                </div>
+                <!-- Qualificação Lista -->
+                <div class="canvas-block border-r border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="clipboard-list" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Qualificação da Lista</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Critérios para qualificar a lista?</p>
+                    </div>
+                    <textarea id="text-qualificacaoLista" placeholder="Ex: Pet Shops ativos com CNPJ"></textarea>
+                </div>
+                <!-- Qualificação Lead -->
+                <div class="canvas-block border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="user-check" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Qualificação do Lead</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Critérios para o potencial cliente?</p>
+                    </div>
+                    <textarea id="text-qualificacaoLead" placeholder="Ex: Decisor tem autonomia"></textarea>
+                </div>
+                <!-- Entrega de Valor -->
+                <div class="canvas-block border-r border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="briefcase" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Entrega de Valor</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">O que oferecer para atrair atenção?</p>
+                    </div>
+                    <textarea id="text-oferta" placeholder="Ex: Diagnóstico gratuito"></textarea>
+                </div>
+                <!-- Abordagem -->
+                <div class="canvas-block border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="send" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Abordagem</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Como é a sua mensagem inicial?</p>
+                    </div>
+                    <textarea id="text-abordagem" placeholder="Ex: Olá [Nome]..."></textarea>
+                </div>
+                <!-- Objeções -->
+                <div class="canvas-block border-r border-b border-gray-ee">
+                    <div class="icon-watermark"><i data-lucide="shield-alert" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Objeções</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Quais as 3 principais objeções?</p>
+                    </div>
+                    <textarea id="text-objecoes" placeholder="Ex: Tá caro, já tenho fornecedor..."></textarea>
+                </div>
+                <!-- Follow Up -->
+                <div class="canvas-block">
+                    <div class="icon-watermark"><i data-lucide="clock" class="w-7 h-7"></i></div>
+                    <div class="mb-6 pr-12">
+                        <h3 class="font-bold text-[15px] uppercase">Follow Up</h3>
+                        <p class="text-[13px] text-[#757575] mt-1.5">Quantas tentativas e intervalos?</p>
+                    </div>
+                    <textarea id="text-followUp" placeholder="Ex: 5 tentativas em 10 dias"></textarea>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-12 md:px-16 py-10 flex flex-col md:flex-row justify-between items-center border-t border-gray-ee bg-white gap-8">
+                <div class="flex items-center">
+                    <a href="https://maquinadeleads.com/" target="_blank">
+                        <img src="https://static.wixstatic.com/media/ac21eb_14dd25b59e154fa385a05afe19edf107~mv2.png/v1/fill/w_153,h_45,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/1.png" alt="Logo" class="h-10 w-auto object-contain">
+                    </a>
+                </div>
+                <p class="text-[12px] font-medium text-gray-400 uppercase tracking-widest text-center md:text-right">
+                    Gere leads em <a href="https://maquinadeleads.com/" target="_blank" class="text-black font-bold hover:underline">maquinadeleads.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar ícones
+        lucide.createIcons();
+
+        // Estado e Elementos
+        const state = {
+            empresa: '',
+            produto: '',
+            metaVendas: 0,
+            ticketMedio: 0,
+            taxaConversao: 0,
+            segmentacao: '',
+            comunicacao: '',
+            localizacao: '',
+            fontes: '',
+            qualificacaoLista: '',
+            qualificacaoLead: '',
+            oferta: '',
+            abordagem: '',
+            objecoes: '',
+            followUp: ''
+        };
+
+        const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        const formatNumber = (val) => new Intl.NumberFormat('pt-BR').format(val);
+        const parseCurrency = (str) => {
+            const clean = str.replace(/[^\d]/g, '');
+            return clean ? parseInt(clean, 10) / 100 : 0;
+        };
+
+        // Função de Atualização de Cálculos
+        function updateCalculations() {
+            const vendasMes = state.ticketMedio > 0 ? Math.ceil(state.metaVendas / state.ticketMedio) : 0;
+            const vendasSemana = Math.ceil(vendasMes / 4);
+            const vendasDia = Math.ceil(vendasSemana / 5);
+            const leadsNecessarios = state.taxaConversao > 0 ? Math.ceil(vendasMes / (state.taxaConversao / 100)) : 0;
+            const abordagensDiarias = Math.ceil(leadsNecessarios / 20);
+
+            document.getElementById('display-vendasMes').innerHTML = `${formatNumber(vendasMes)} <span class="text-[13px] text-gray-400">vendas</span>`;
+            document.getElementById('display-vendasSemana').textContent = formatNumber(vendasSemana);
+            document.getElementById('display-vendasDia').textContent = formatNumber(vendasDia);
+            document.getElementById('display-leadsNecessarios').innerHTML = `${formatNumber(leadsNecessarios)} <span class="text-[14px]">leads</span>`;
+            document.getElementById('display-abordagensDiarias').innerHTML = `${formatNumber(abordagensDiarias)} <span class="text-[14px]">contatos</span>`;
+            
+            saveToStorage();
+        }
+
+        // Auto-ajuste de altura para textareas
+        function adjustTextareaHeight(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+            // Mudar cor se tiver texto
+            if (el.value.trim() !== '') {
+                el.classList.add('royal-blue');
+                el.classList.remove('text-gray-300');
+            } else {
+                el.classList.remove('royal-blue');
+                el.classList.add('text-gray-300');
+            }
+        }
+
+        // Persistência
+        function saveToStorage() {
+            localStorage.setItem('prospecting_map_v2', JSON.stringify(state));
+        }
+
+        function loadFromStorage() {
+            const saved = localStorage.getItem('prospecting_map_v2');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.assign(state, data);
+                
+                // Preencher campos
+                document.getElementById('input-empresa').value = state.empresa;
+                document.getElementById('input-produto').value = state.produto;
+                document.getElementById('input-metaVendas').value = formatCurrency(state.metaVendas);
+                document.getElementById('input-ticketMedio').value = formatCurrency(state.ticketMedio);
+                document.getElementById('input-taxaConversao').value = state.taxaConversao || '';
+                
+                const texts = ['segmentacao', 'comunicacao', 'localizacao', 'fontes', 'qualificacaoLista', 'qualificacaoLead', 'oferta', 'abordagem', 'objecoes', 'followUp'];
+                texts.forEach(key => {
+                    const el = document.getElementById(`text-${key}`);
+                    if (el) {
+                        el.value = state[key] || '';
+                        adjustTextareaHeight(el);
+                    }
+                });
+
+                updateCalculations();
+            }
+        }
+
+        // Event Listeners
+        document.querySelectorAll('textarea').forEach(tx => {
+            tx.addEventListener('input', (e) => {
+                const key = e.target.id.replace('text-', '');
+                state[key] = e.target.value;
+                adjustTextareaHeight(e.target);
+                saveToStorage();
+            });
+        });
+
+        document.getElementById('input-empresa').addEventListener('input', (e) => { state.empresa = e.target.value; saveToStorage(); });
+        document.getElementById('input-produto').addEventListener('input', (e) => { state.produto = e.target.value; saveToStorage(); });
+
+        document.getElementById('input-metaVendas').addEventListener('input', (e) => {
+            state.metaVendas = parseCurrency(e.target.value);
+            e.target.value = formatCurrency(state.metaVendas);
+            updateCalculations();
+        });
+
+        document.getElementById('input-ticketMedio').addEventListener('input', (e) => {
+            state.ticketMedio = parseCurrency(e.target.value);
+            e.target.value = formatCurrency(state.ticketMedio);
+            updateCalculations();
+        });
+
+        document.getElementById('input-taxaConversao').addEventListener('input', (e) => {
+            state.taxaConversao = parseFloat(e.target.value) || 0;
+            updateCalculations();
+        });
+
+        // Exportar como PNG
+        document.getElementById('exportBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('exportBtn');
+            btn.style.opacity = '0';
+            
+            const canvas = await html2canvas(document.getElementById('captureArea'), {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            });
+            
+            btn.style.opacity = '1';
+            const link = document.createElement('a');
+            link.download = `plano-prospeccao-${state.empresa || 'maquina'}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+
+        // Init
+        loadFromStorage();
+    </script>
+</body>
 </html>
