@@ -6,7 +6,6 @@
     <title>Plano de Prospecção Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -48,6 +47,8 @@
         @media print {
             .no-print { display: none !important; }
             body { background-color: white; padding: 0; }
+            .md\:border { border: none !important; }
+            .md\:shadow-2xl { shadow: none !important; }
         }
         /* Remove arrows from number inputs */
         input::-webkit-outer-spin-button,
@@ -62,23 +63,25 @@
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
+    "react": "https://esm.sh/react@^19.2.3/",
     "html2canvas": "https://esm.sh/html2canvas@^1.4.1"
   }
 }
 </script>
 </head>
 <body class="py-12 px-4">
-    <div class="max-w-[1200px] mx-auto">
+    <div id="root"></div>
+    
+    <div class="max-w-[1200px] mx-auto no-print-container">
         <!-- Botão de Exportar -->
         <div class="flex justify-end mb-6 no-print">
             <button id="exportBtn" class="flex items-center gap-2 px-8 py-3 bg-black text-white rounded-lg font-bold text-sm hover:bg-gray-800 transition-all shadow-md active:scale-95">
-                <i data-lucide="download" class="w-4 h-4"></i> Exportar Plano
+                <i data-lucide="printer" class="w-4 h-4"></i> Imprimir / PDF
             </button>
         </div>
 
         <!-- Canvas Principal -->
-        <div id="captureArea" class="bg-white border-gray-ee md:border md:shadow-2xl overflow-hidden flex flex-col">
+        <div id="captureArea" class="bg-white border-gray-ee md:border md:shadow-2xl overflow-hidden flex flex-col print:shadow-none print:border-none">
             
             <!-- Header -->
             <div class="px-12 pt-16 pb-12 flex flex-col lg:flex-row justify-start items-start lg:items-end gap-10 lg:gap-32 border-b border-gray-ee">
@@ -422,22 +425,9 @@
             updateCalculations();
         });
 
-        // Exportar como PNG
-        document.getElementById('exportBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('exportBtn');
-            btn.style.opacity = '0';
-            
-            const canvas = await html2canvas(document.getElementById('captureArea'), {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#ffffff'
-            });
-            
-            btn.style.opacity = '1';
-            const link = document.createElement('a');
-            link.download = `plano-prospeccao-${state.empresa || 'maquina'}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+        // Imprimir / PDF
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            window.print();
         });
 
         // Init
